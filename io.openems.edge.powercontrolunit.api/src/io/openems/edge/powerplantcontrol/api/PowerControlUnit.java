@@ -1,5 +1,7 @@
 package io.openems.edge.powerplantcontrol.api;
 
+import io.openems.edge.common.channel.LongReadChannel;
+import io.openems.edge.common.channel.value.Value;
 import org.osgi.annotation.versioning.ProviderType;
 
 import io.openems.common.channel.PersistencePriority;
@@ -22,7 +24,7 @@ public interface PowerControlUnit extends OpenemsComponent {
 		 * <li>Range: zero or positive value
 		 * </ul>
 		 */
-        MAX_ACTIVE_POWER_IMPORT(Doc.of(OpenemsType.INTEGER)//
+        MAX_BUY_FROM_GRID_LIMIT(Doc.of(OpenemsType.INTEGER)//
                 .unit(Unit.WATT)//
                 .persistencePriority(PersistencePriority.HIGH)),
 		
@@ -36,7 +38,7 @@ public interface PowerControlUnit extends OpenemsComponent {
 		 * <li>Range: zero or positive value
 		 * </ul>
 		 */
-        MAX_ACTIVE_POWER_EXPORT(Doc.of(OpenemsType.INTEGER)//
+        MAX_SELL_TO_GRID_LIMIT(Doc.of(OpenemsType.INTEGER)//
 				.unit(Unit.WATT)//
 				.persistencePriority(PersistencePriority.HIGH)),
 
@@ -50,7 +52,7 @@ public interface PowerControlUnit extends OpenemsComponent {
          * <li>Range: zero or positive value
          * </ul>
          */
-        MAX_REACTIVE_POWER(Doc.of(OpenemsType.INTEGER)//
+        MAX_REACTIVE_POWER_LIMIT(Doc.of(OpenemsType.INTEGER)//
 				.unit(Unit.VOLT_AMPERE_REACTIVE)//
 				.persistencePriority(PersistencePriority.HIGH));
 
@@ -67,4 +69,53 @@ public interface PowerControlUnit extends OpenemsComponent {
 			return this.doc;
 		}
 	}
+
+	/**
+	 * Gets the Channel for {@link ChannelId#MAX_BUY_FROM_GRID_LIMIT}.
+	 *
+	 * @return the Channel
+	 */
+	public default LongReadChannel getMaxBuyFromGridLimitChannel() {
+		return this.channel(ChannelId.MAX_BUY_FROM_GRID_LIMIT);
+	}
+
+
+	/**
+	 * Internal method to set the 'nextValue' on
+	 * {@link ChannelId#MAX_BUY_FROM_GRID_LIMIT} Channel.
+	 *
+	 * @param value the next value in {@link long}
+	 */
+	public default void _setMaxBuyFromGridLimit(long value) {
+		this.getMaxBuyFromGridLimitChannel().setNextValue(value);
+	}
+
+	public default Value<Long> getMaxBuyFromGridLimit() {
+		return this.getMaxBuyFromGridLimitChannel().value();
+	}
+
+
+	/**
+	 * Gets the Channel for {@link ChannelId#MAX_BUY_FROM_GRID_LIMIT}.
+	 *
+	 * @return the Channel
+	 */
+	public default LongReadChannel getMaxSellToGridLimitChannel() {
+		return this.channel(ChannelId.MAX_SELL_TO_GRID_LIMIT);
+	}
+
+	/**
+	 * Internal method to set the 'nextValue' on
+	 * {@link ChannelId#MAX_BUY_FROM_GRID_LIMIT} Channel.
+	 *
+	 * @param value the next value in {@link long}
+	 */
+	public default void _setMaxSellToGridLimit(long value) {
+		this.getMaxSellToGridLimitChannel().setNextValue(value);
+	}
+
+	public default Value<Long> getMaxSellToGridLimit() {
+		return this.getMaxSellToGridLimitChannel().value();
+	}
+
 }
