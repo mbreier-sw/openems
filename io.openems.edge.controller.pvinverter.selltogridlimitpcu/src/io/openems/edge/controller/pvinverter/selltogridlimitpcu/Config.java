@@ -4,8 +4,8 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(//
-		name = "Controller PV-Inverter Sell-to-Grid Limit", //
-		description = "Reduces PV-Inverter power to limit the Sell-to-Grid power.")
+		name = "Controller PV-Inverter Sell-to-Grid Limit PCU", //
+		description = "Reduces PV-Inverter power to limit the Sell-to-Grid power PCU based.")
 @interface Config {
 
 	@AttributeDefinition(name = "Component-ID", description = "Unique ID of this Component")

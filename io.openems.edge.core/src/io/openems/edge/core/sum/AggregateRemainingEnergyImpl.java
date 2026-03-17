@@ -6,6 +6,7 @@ import io.openems.edge.common.component.ComponentManager;
 import io.openems.edge.common.component.OpenemsComponent;
 import io.openems.edge.common.event.EdgeEventConstants;
 import io.openems.edge.common.sum.AggregateRemainingEnergy;
+import io.openems.edge.common.sum.Sum;
 import io.openems.edge.ess.api.RemainingEssEnergy;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -33,8 +34,11 @@ public class AggregateRemainingEnergyImpl
     @Reference
     private ComponentManager componentManager;
 
-    protected AggregateRemainingEnergyImpl(io.openems.edge.common.channel.ChannelId[] firstInitialChannelIds, io.openems.edge.common.channel.ChannelId[]... furtherInitialChannelIds) {
-        super(firstInitialChannelIds, furtherInitialChannelIds);
+    public AggregateRemainingEnergyImpl() {
+        super(//
+            OpenemsComponent.ChannelId.values(), //
+            AggregateRemainingEnergy.ChannelId.values() //
+        );
     }
 
     @Activate

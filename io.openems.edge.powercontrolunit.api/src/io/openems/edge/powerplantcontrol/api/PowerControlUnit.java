@@ -19,12 +19,12 @@ public interface PowerControlUnit extends OpenemsComponent {
 		 *
 		 * <ul>
 		 * <li>Interface: PowerControlUnit
-		 * <li>Type: Integer
+		 * <li>Type: Long
 		 * <li>Unit: Watt
 		 * <li>Range: zero or positive value
 		 * </ul>
 		 */
-        MAX_BUY_FROM_GRID_LIMIT(Doc.of(OpenemsType.INTEGER)//
+        MAX_BUY_FROM_GRID_LIMIT(Doc.of(OpenemsType.LONG)//
                 .unit(Unit.WATT)//
                 .persistencePriority(PersistencePriority.HIGH)),
 		
@@ -33,12 +33,12 @@ public interface PowerControlUnit extends OpenemsComponent {
 		 *
 		 * <ul>
 		 * <li>Interface: PowerControlUnit
-		 * <li>Type: Integer
+		 * <li>Type: Long
 		 * <li>Unit: Watt
 		 * <li>Range: zero or positive value
 		 * </ul>
 		 */
-        MAX_SELL_TO_GRID_LIMIT(Doc.of(OpenemsType.INTEGER)//
+        MAX_SELL_TO_GRID_LIMIT(Doc.of(OpenemsType.LONG)//
 				.unit(Unit.WATT)//
 				.persistencePriority(PersistencePriority.HIGH)),
 
@@ -47,12 +47,12 @@ public interface PowerControlUnit extends OpenemsComponent {
          *
          * <ul>
          * <li>Interface: PowerControlUnit
-         * <li>Type: Integer
+         * <li>Type: Long
          * <li>Unit: Watt
          * <li>Range: zero or positive value
          * </ul>
          */
-        MAX_REACTIVE_POWER_LIMIT(Doc.of(OpenemsType.INTEGER)//
+        MAX_REACTIVE_POWER_LIMIT(Doc.of(OpenemsType.LONG)//
 				.unit(Unit.VOLT_AMPERE_REACTIVE)//
 				.persistencePriority(PersistencePriority.HIGH));
 

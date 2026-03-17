@@ -1,14 +1,5 @@
 package io.openems.edge.controller.pvinverter.selltogridlimit;
 
-import io.openems.edge.common.sum.AggregateRemainingEnergy;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.Designate;
-
 import io.openems.common.exceptions.InvalidValueException;
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
 import io.openems.edge.common.component.AbstractOpenemsComponent;
@@ -17,6 +8,9 @@ import io.openems.edge.common.component.OpenemsComponent;
 import io.openems.edge.controller.api.Controller;
 import io.openems.edge.meter.api.ElectricityMeter;
 import io.openems.edge.pvinverter.api.ManagedSymmetricPvInverter;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
+import org.osgi.service.metatype.annotations.Designate;
 
 @Designate(ocd = Config.class, factory = true)
 @Component(//
@@ -31,9 +25,6 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 
 	@Reference
 	private ComponentManager componentManager;
-
-    @Reference
-    private AggregateRemainingEnergy aggregateRemainingEnergy;
 
 	private Config config;
 	private long lastSetLimit = 0L;
@@ -63,13 +54,12 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 	 *
 	 * @param pvInverter     the SymmetricPvInverter
 	 * @param meter          the Meter
-     * @param aggregateRemainingEnergy the remaining Ess energy
 	 * @param asymmetricMode is asymmetric mode configured
 	 * @return the required power
 	 * @throws InvalidValueException on error
 	 */
 	private long calculateRequiredPower(ManagedSymmetricPvInverter pvInverter, ElectricityMeter meter,
-			AggregateRemainingEnergy aggregateRemainingEnergy, boolean asymmetricMode) throws InvalidValueException {
+			boolean asymmetricMode) throws InvalidValueException {
 
 		/*
 		 * Calculate grid-power
@@ -91,8 +81,7 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 		}
 		return gridPower /* current buy-from/sell-to grid */
 				+ pvInverter.getActivePower().getOrError() /* current production */
-				+ maximumSellToGridPower /* the configured limit */
-                + aggregateRemainingEnergy.getSumRemainingAvailableChargePower().getOrError(); /* */
+				+ maximumSellToGridPower; /* the configured limit */
 	}
 
 	@Override
@@ -101,7 +90,7 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 		ElectricityMeter meter = this.componentManager.getComponent(this.config.meter_id());
 
 		// Calculates required charge/discharge power
-		var calculatedPower = this.calculateRequiredPower(pvInverter, meter, aggregateRemainingEnergy, this.config.asymmetricMode());
+		var calculatedPower = this.calculateRequiredPower(pvInverter, meter, this.config.asymmetricMode());
 
 		if (Math.abs(this.lastSetLimit) > 100 && Math.abs(calculatedPower) > 100 && Math
 				.abs(this.lastSetLimit - calculatedPower) > Math.abs(this.lastSetLimit) * DEFAULT_MAX_ADJUSTMENT_RATE) {
