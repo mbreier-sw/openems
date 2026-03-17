@@ -1,6 +1,9 @@
 package io.openems.edge.simulator.ess.symmetric.reacting;
 
 import static io.openems.edge.common.event.EdgeEventConstants.TOPIC_CYCLE_AFTER_PROCESS_IMAGE;
+import static java.lang.Math.floor;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static org.osgi.service.component.annotations.ConfigurationPolicy.REQUIRE;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
@@ -10,6 +13,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
+import io.openems.common.exceptions.InvalidValueException;
+import io.openems.edge.ess.api.RemainingEssEnergy;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -46,7 +51,7 @@ import io.openems.edge.timedata.api.utils.CalculateEnergyFromPower;
 @EventTopics({ //
 		TOPIC_CYCLE_AFTER_PROCESS_IMAGE })
 public class SimulatorEssSymmetricReactingImpl extends AbstractOpenemsComponent
-		implements SimulatorEssSymmetricReacting, ManagedSymmetricEss, SymmetricEss, OpenemsComponent, TimedataProvider,
+		implements SimulatorEssSymmetricReacting, RemainingEssEnergy, ManagedSymmetricEss, SymmetricEss, OpenemsComponent, TimedataProvider,
 		EventHandler, StartStoppable, ModbusSlave {
 
 	private final CalculateEnergyFromPower calculateChargeEnergy = new CalculateEnergyFromPower(this,
@@ -74,10 +79,49 @@ public class SimulatorEssSymmetricReactingImpl extends AbstractOpenemsComponent
 		super(//
 				OpenemsComponent.ChannelId.values(), //
 				SymmetricEss.ChannelId.values(), //
+				RemainingEssEnergy.ChannelId.values(), //
 				ManagedSymmetricEss.ChannelId.values(), //
 				StartStoppable.ChannelId.values(), //
 				SimulatorEssSymmetricReacting.ChannelId.values() //
 		);
+
+		this.getSocChannel().onSetNextValue(soc -> {
+			if (soc.isDefined()) {
+				try {
+					var maxCapacity = this.getCapacity().getOrError();
+					var currentSocInWh = ((Double) floor((soc.get() * maxCapacity) / 100.d)).longValue();
+					this._setRemainingAvailableChargeCapacity(maxCapacity - currentSocInWh);
+					this._setRemainingAvailableDischargeCapacity(currentSocInWh);
+				} catch (InvalidValueException e) {
+                    // shouldn't happen -> capacity should always be available
+                }
+            }
+		});
+
+		this.getAllowedChargePowerChannel().onSetNextValue(allowedChargePowerValue -> {
+			if (allowedChargePowerValue.isDefined()) {
+                try {
+                    var chargePower = this.getActivePower().getOrError().longValue(); // negative is charge
+					//allowed chargePower == negative or 0
+					this._setRemainingAvailableChargePower(min(0, allowedChargePowerValue.get() - chargePower));
+                } catch (InvalidValueException e) {
+                    // shouldn't happen
+                }
+            }
+		});
+
+		this.getAllowedDischargePowerChannel().onSetNextValue(allowedDischargePowerValue -> {
+			if (allowedDischargePowerValue.isDefined()) {
+				try {
+					var dischargePower = this.getActivePower().getOrError().longValue(); // negative is charge
+					//allowed dischargePower == positive or 0
+					this._setRemainingAvailableDischargePower(max(0, allowedDischargePowerValue.get() - dischargePower));
+				} catch (InvalidValueException e) {
+					// shouldn't happen
+				}
+			}
+		});
+
 	}
 
 	@Activate
