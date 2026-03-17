@@ -94,12 +94,13 @@ public class ControllerPvInverterSellToGridLimitPcuImpl extends AbstractOpenemsC
 			gridPower = meter.getActivePower().getOrError();
 		}
         var currentProduction = pvInverter.getActivePower().getOrError();
-        var aggregatedAvailableChargePower = aggregateRemainingEnergy.getSumRemainingAvailableChargePower().getOrError();
+        var aggregatedAvailableChargePower = Math.abs(
+                aggregateRemainingEnergy.getSumRemainingAvailableChargePower().getOrError());
 
 		return gridPower /* current buy-from/sell-to grid */
 				+ currentProduction
 				+ maximumSellToGridPower /* the configured limit */
-                + aggregatedAvailableChargePower; /* */
+                + aggregatedAvailableChargePower;
 	}
 
 	@Override
