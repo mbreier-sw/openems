@@ -47,7 +47,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      *
      * @return the Channel
      */
-    public default LongReadChannel getRemainingAvailableChargeCapacityChannel() {
+    public default LongReadChannel getRemainingChargeCapacityChannel() {
         return this.channel(ChannelId.REMAINING_CHARGE_CAPACITY);
     }
 
@@ -58,7 +58,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      * @return the Channel {@link Value}
      */
     public default Value<Long> getRemainingAvailableChargeCapacity() {
-        return this.getRemainingAvailableChargeCapacityChannel().value();
+        return this.getRemainingChargeCapacityChannel().value();
     }
 
     /**
@@ -67,7 +67,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      *
      */
     public default void _setRemainingAvailableChargeCapacity(Long value) {
-        this.getRemainingAvailableChargeCapacityChannel().setNextValue(value);
+        this.getRemainingChargeCapacityChannel().setNextValue(value);
     }
 
     /**
@@ -75,7 +75,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      *
      * @return the Channel
      */
-    public default LongReadChannel getRemainingAvailableDischargeCapacityChannel() {
+    public default LongReadChannel getRemainingDischargeCapacityChannel() {
         return this.channel(ChannelId.REMAINING_DISCHARGE_CAPACITY);
     }
 
@@ -86,7 +86,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      * @return the Channel {@link Value}
      */
     public default Value<Long> getRemainingAvailableDischargeCapacity() {
-        return this.getRemainingAvailableDischargeCapacityChannel().value();
+        return this.getRemainingDischargeCapacityChannel().value();
     }
 
     /**
@@ -95,7 +95,7 @@ public interface RemainingEssEnergy extends ManagedSymmetricEss {
      *
      */
     public default void _setRemainingAvailableDischargeCapacity(Long value) {
-        this.getRemainingAvailableDischargeCapacityChannel().setNextValue(value);
+        this.getRemainingDischargeCapacityChannel().setNextValue(value);
     }
 
     /**

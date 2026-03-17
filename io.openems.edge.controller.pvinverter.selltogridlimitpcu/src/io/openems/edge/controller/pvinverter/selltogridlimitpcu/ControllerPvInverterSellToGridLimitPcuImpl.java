@@ -1,6 +1,7 @@
-package io.openems.edge.controller.pvinverter.selltogridlimit;
+package io.openems.edge.controller.pvinverter.selltogridlimitpcu;
 
 import io.openems.edge.common.sum.AggregateRemainingEnergy;
+import io.openems.edge.powerplantcontrol.api.PowerControlUnit;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -24,8 +25,8 @@ import io.openems.edge.pvinverter.api.ManagedSymmetricPvInverter;
 		immediate = true, //
 		configurationPolicy = ConfigurationPolicy.REQUIRE //
 )
-public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComponent
-		implements ControllerPvInverterSellToGridLimit, Controller, OpenemsComponent {
+public class ControllerPvInverterSellToGridLimitPcuImpl extends AbstractOpenemsComponent
+		implements ControllerPvInverterSellToGridLimitPcu, Controller, OpenemsComponent {
 
 	public static final double DEFAULT_MAX_ADJUSTMENT_RATE = 0.2;
 
@@ -33,16 +34,19 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 	private ComponentManager componentManager;
 
     @Reference
+    private PowerControlUnit powerControlUnit;
+
+    @Reference
     private AggregateRemainingEnergy aggregateRemainingEnergy;
 
 	private Config config;
 	private long lastSetLimit = 0L;
 
-	public ControllerPvInverterSellToGridLimitImpl() {
+	public ControllerPvInverterSellToGridLimitPcuImpl() {
 		super(//
 				OpenemsComponent.ChannelId.values(), //
 				Controller.ChannelId.values(), //
-				ControllerPvInverterSellToGridLimit.ChannelId.values() //
+				ControllerPvInverterSellToGridLimitPcu.ChannelId.values() //
 		);
 	}
 
@@ -75,7 +79,7 @@ public class ControllerPvInverterSellToGridLimitImpl extends AbstractOpenemsComp
 		 * Calculate grid-power
 		 */
 		var gridPower = 0;
-		var maximumSellToGridPower = this.config.maximumSellToGridPower();
+		var maximumSellToGridPower = this.powerControlUnit.getMaxSellToGridLimit().getOrError();
 
 		if (asymmetricMode) {
 			// TODO: Optimize for Single-Phase PV-Inverter
