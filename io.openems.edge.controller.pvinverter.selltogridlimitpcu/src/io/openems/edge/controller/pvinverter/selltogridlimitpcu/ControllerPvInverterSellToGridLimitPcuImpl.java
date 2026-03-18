@@ -21,7 +21,7 @@ import io.openems.edge.pvinverter.api.ManagedSymmetricPvInverter;
 
 @Designate(ocd = Config.class, factory = true)
 @Component(//
-		name = "Controller.PvInverter.SellToGridLimit", //
+		name = "Controller.PvInverter.SellToGridLimitPCU", //
 		immediate = true, //
 		configurationPolicy = ConfigurationPolicy.REQUIRE //
 )
@@ -32,9 +32,6 @@ public class ControllerPvInverterSellToGridLimitPcuImpl extends AbstractOpenemsC
 
 	@Reference
 	private ComponentManager componentManager;
-
-    @Reference
-    private PowerControlUnit powerControlUnit;
 
     @Reference
     private AggregateRemainingEnergy aggregateRemainingEnergy;
@@ -67,19 +64,23 @@ public class ControllerPvInverterSellToGridLimitPcuImpl extends AbstractOpenemsC
 	 *
 	 * @param pvInverter     the SymmetricPvInverter
 	 * @param meter          the Meter
+     * @param powerControlUnit the PowerControlUnit
      * @param aggregateRemainingEnergy the remaining Ess energy
 	 * @param asymmetricMode is asymmetric mode configured
 	 * @return the required power
 	 * @throws InvalidValueException on error
 	 */
-	private long calculateRequiredPower(ManagedSymmetricPvInverter pvInverter, ElectricityMeter meter,
-			AggregateRemainingEnergy aggregateRemainingEnergy, boolean asymmetricMode) throws InvalidValueException {
+	private long calculateRequiredPower(ManagedSymmetricPvInverter pvInverter,
+                                        ElectricityMeter meter,
+                                        PowerControlUnit powerControlUnit,
+			                            AggregateRemainingEnergy aggregateRemainingEnergy,
+                                        boolean asymmetricMode) throws InvalidValueException {
 
 		/*
 		 * Calculate grid-power
 		 */
 		var gridPower = 0;
-		var maximumSellToGridPower = this.powerControlUnit.getMaxSellToGridLimit().getOrError();
+		var maximumSellToGridPower = powerControlUnit.getMaxSellToGridLimit().getOrError();
 
 		if (asymmetricMode) {
 			// TODO: Optimize for Single-Phase PV-Inverter
@@ -107,9 +108,11 @@ public class ControllerPvInverterSellToGridLimitPcuImpl extends AbstractOpenemsC
 	public void run() throws OpenemsNamedException {
 		ManagedSymmetricPvInverter pvInverter = this.componentManager.getComponent(this.config.pvInverter_id());
 		ElectricityMeter meter = this.componentManager.getComponent(this.config.meter_id());
+        PowerControlUnit powerControlUnit = this.componentManager.getComponent(this.config.pcu_id());
 
 		// Calculates required charge/discharge power
-		var calculatedPower = this.calculateRequiredPower(pvInverter, meter, aggregateRemainingEnergy, this.config.asymmetricMode());
+		var calculatedPower = this.calculateRequiredPower(pvInverter, meter,
+                powerControlUnit, aggregateRemainingEnergy, this.config.asymmetricMode());
 
 		if (Math.abs(this.lastSetLimit) > 100 && Math.abs(calculatedPower) > 100 && Math
 				.abs(this.lastSetLimit - calculatedPower) > Math.abs(this.lastSetLimit) * DEFAULT_MAX_ADJUSTMENT_RATE) {

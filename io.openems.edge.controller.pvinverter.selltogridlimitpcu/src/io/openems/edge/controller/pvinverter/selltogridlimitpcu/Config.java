@@ -23,7 +23,10 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 	@AttributeDefinition(name = "Grid-Meter-ID", description = "ID of the Grid-Meter.")
 	String meter_id();
 
-	@AttributeDefinition(name = "Asymmetric Mode (Not optimized for Single-Phase PV-Inverter)", description = "Reduces PV-Inverter power to limit the Sell-to-Grid power, depending on the individual phase.")
+    @AttributeDefinition(name = "PCU-ID", description = "ID of the Power-Control-Unit.")
+    String pcu_id();
+
+    @AttributeDefinition(name = "Asymmetric Mode (Not optimized for Single-Phase PV-Inverter)", description = "Reduces PV-Inverter power to limit the Sell-to-Grid power, depending on the individual phase.")
 	boolean asymmetricMode() default false;
 
 	String webconsole_configurationFactory_nameHint() default "Controller PV-Inverter Sell-to-Grid Limit [{id}]";
